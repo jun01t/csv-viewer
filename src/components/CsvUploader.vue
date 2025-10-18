@@ -2,11 +2,11 @@
     <div class="w-full">
         <div class="border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 cursor-pointer"
             :class="isDragging
-                ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-                : 'border-gray-300 bg-gray-50 hover:border-blue-500 hover:bg-blue-50'" @drop.prevent="handleDrop"
+                ? 'border-green-500 bg-green-50 scale-[1.02]'
+                : 'border-gray-300 bg-gray-50 hover:border-green-500 hover:bg-green-50'" @drop.prevent="handleDrop"
             @dragover.prevent @dragenter.prevent="isDragging = true" @dragleave.prevent="isDragging = false">
             <div class="flex flex-col items-center gap-4">
-                <svg class="w-16 h-16 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                <svg class="w-16 h-16 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -16,7 +16,7 @@
                 <label class="cursor-pointer">
                     <input type="file" ref="fileInput" @change="handleFileSelect" accept=".csv" class="hidden" />
                     <span
-                        class="inline-block px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg transition-all duration-300 hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-lg">
+                        class="inline-block px-6 py-3 bg-green-500 text-white font-semibold rounded-lg transition-all duration-300 hover:bg-green-600 hover:-translate-y-0.5 hover:shadow-lg">
                         ファイルを選択
                     </span>
                 </label>
@@ -24,7 +24,7 @@
         </div>
 
         <div v-if="fileName" class="flex items-center gap-3 mt-4 p-4 bg-gray-100 rounded-lg">
-            <svg class="w-6 h-6 text-blue-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+            <svg class="w-6 h-6 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

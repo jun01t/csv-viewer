@@ -1,7 +1,7 @@
 <template>
     <div class="w-full mt-8">
         <div v-if="csvData && csvData.length > 0" class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="flex justify-around p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+            <div class="flex justify-around p-6 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white">
                 <div class="flex flex-col items-center gap-1">
                     <span class="text-sm opacity-90">ファイル名:</span>
                     <span class="text-2xl font-bold">{{ fileName }}</span>
@@ -31,7 +31,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(row, index) in csvData" :key="index" class="transition-colors duration-200"
-                            :class="index % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50' : 'bg-white hover:bg-blue-50'">
+                            :class="index % 2 === 0 ? 'bg-gray-50 hover:bg-green-50' : 'bg-white hover:bg-green-50'">
                             <td
                                 class="px-4 py-3 text-center font-semibold text-gray-700 bg-gray-100 sticky left-0 z-[5]">
                                 {{ index + 1 }}
