@@ -53,7 +53,8 @@ npm run preview
 - **ビルドツール**: Vite
 - **フレームワーク**: Vue 3 (Composition API)
 - **CSVパーサー**: PapaParse
-- **スタイリング**: CSS (カスタム)
+- **スタイリング**: Tailwind CSS
+- **エンコーディング**: encoding-japanese (Shift-JIS、UTF-8などを自動検出)
 
 ## プロジェクト構造
 

@@ -1,35 +1,43 @@
 <template>
-    <div class="csv-table-container">
-        <div v-if="csvData && csvData.length > 0" class="table-wrapper">
-            <div class="table-info">
-                <div class="info-item">
-                    <span class="info-label">ファイル名:</span>
-                    <span class="info-value">{{ fileName }}</span>
+    <div class="w-full mt-8">
+        <div v-if="csvData && csvData.length > 0" class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="flex justify-around p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-sm opacity-90">ファイル名:</span>
+                    <span class="text-2xl font-bold">{{ fileName }}</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">行数:</span>
-                    <span class="info-value">{{ csvData.length }}</span>
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-sm opacity-90">行数:</span>
+                    <span class="text-2xl font-bold">{{ csvData.length }}</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">列数:</span>
-                    <span class="info-value">{{ columns.length }}</span>
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-sm opacity-90">列数:</span>
+                    <span class="text-2xl font-bold">{{ columns.length }}</span>
                 </div>
             </div>
 
-            <div class="table-scroll">
-                <table class="csv-table">
-                    <thead>
+            <div class="overflow-x-auto overflow-y-auto max-h-[600px]">
+                <table class="w-full border-collapse text-sm">
+                    <thead class="bg-gray-700 text-white sticky top-0 z-10">
                         <tr>
-                            <th class="row-number">#</th>
-                            <th v-for="column in columns" :key="column">
+                            <th
+                                class="bg-gray-800 px-4 py-4 text-center font-semibold border-b-2 border-gray-900 whitespace-nowrap sticky left-0 z-[15]">
+                                #</th>
+                            <th v-for="column in columns" :key="column"
+                                class="px-4 py-4 text-left font-semibold border-b-2 border-gray-900 whitespace-nowrap">
                                 {{ column }}
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(row, index) in csvData" :key="index" :class="{ 'even-row': index % 2 === 0 }">
-                            <td class="row-number">{{ index + 1 }}</td>
-                            <td v-for="column in columns" :key="column">
+                        <tr v-for="(row, index) in csvData" :key="index" class="transition-colors duration-200"
+                            :class="index % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50' : 'bg-white hover:bg-blue-50'">
+                            <td
+                                class="px-4 py-3 text-center font-semibold text-gray-700 bg-gray-100 sticky left-0 z-[5]">
+                                {{ index + 1 }}
+                            </td>
+                            <td v-for="column in columns" :key="column"
+                                class="px-4 py-3 border-b border-gray-200 text-gray-800">
                                 {{ row[column] }}
                             </td>
                         </tr>
@@ -37,13 +45,14 @@
                 </table>
             </div>
         </div>
-        <div v-else class="empty-state">
-            <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+
+        <div v-else class="flex flex-col items-center justify-center p-16 bg-white rounded-xl shadow-lg">
+            <svg class="w-20 h-20 text-gray-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p class="empty-text">CSVファイルをアップロードしてください</p>
+            <p class="text-lg text-gray-400">CSVファイルをアップロードしてください</p>
         </div>
     </div>
 </template>
@@ -69,130 +78,3 @@ const columns = computed(() => {
     return [];
 });
 </script>
-
-<style scoped>
-.csv-table-container {
-    width: 100%;
-    margin-top: 2rem;
-}
-
-.table-wrapper {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.table-info {
-    display: flex;
-    justify-content: space-around;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.info-label {
-    font-size: 0.875rem;
-    opacity: 0.9;
-}
-
-.info-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.table-scroll {
-    overflow-x: auto;
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.csv-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-}
-
-.csv-table thead {
-    background-color: #4a5568;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.csv-table th {
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    border-bottom: 2px solid #2d3748;
-    white-space: nowrap;
-}
-
-.csv-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    color: #2d3748;
-}
-
-.csv-table tbody tr {
-    transition: background-color 0.2s ease;
-}
-
-.csv-table tbody tr:hover {
-    background-color: #ebf8ff;
-}
-
-.csv-table tbody tr.even-row {
-    background-color: #f7fafc;
-}
-
-.csv-table tbody tr.even-row:hover {
-    background-color: #ebf8ff;
-}
-
-.row-number {
-    background-color: #edf2f7;
-    font-weight: 600;
-    color: #4a5568;
-    text-align: center;
-    position: sticky;
-    left: 0;
-    z-index: 5;
-}
-
-.csv-table thead .row-number {
-    background-color: #2d3748;
-}
-
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.empty-icon {
-    width: 80px;
-    height: 80px;
-    color: #cbd5e0;
-    margin-bottom: 1rem;
-}
-
-.empty-text {
-    font-size: 1.125rem;
-    color: #a0aec0;
-    margin: 0;
-}
-</style>
