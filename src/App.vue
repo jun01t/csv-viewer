@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+  <div class="min-h-screen flex flex-col bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500">
     <header class="bg-white/10 backdrop-blur-md shadow-lg">
       <div class="max-w-7xl mx-auto px-4 py-8">
         <h1 class="flex items-center gap-4 text-4xl md:text-5xl font-bold text-white mb-2">
