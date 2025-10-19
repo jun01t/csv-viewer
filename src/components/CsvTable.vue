@@ -8,11 +8,40 @@
                 </div>
                 <div class="flex flex-col items-center gap-1">
                     <span class="text-sm opacity-90">行数:</span>
-                    <span class="text-2xl font-bold">{{ csvData.length }}</span>
+                    <span class="text-2xl font-bold">
+                        {{ sortedData.length }}
+                        <span v-if="filterText" class="text-base opacity-75">/ {{ csvData.length }}</span>
+                    </span>
                 </div>
                 <div class="flex flex-col items-center gap-1">
                     <span class="text-sm opacity-90">列数:</span>
                     <span class="text-2xl font-bold">{{ columns.length }}</span>
+                </div>
+            </div>
+
+            <!-- フィルター検索ボックス -->
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="flex-1 relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input v-model="filterText" type="text" placeholder="全カラムから検索..."
+                            class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-gray-800" />
+                        <button v-if="filterText" @click="clearFilter"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div v-if="filterText" class="text-sm text-gray-600 whitespace-nowrap">
+                        {{ sortedData.length }} 件該当
+                    </div>
                 </div>
             </div>
 
@@ -94,6 +123,7 @@ const props = defineProps({
 
 const sortColumn = ref(null);
 const sortDirection = ref('asc'); // 'asc' or 'desc'
+const filterText = ref(''); // フィルター用のテキスト
 
 const columns = computed(() => {
     if (props.csvData && props.csvData.length > 0) {
@@ -102,12 +132,31 @@ const columns = computed(() => {
     return [];
 });
 
-const sortedData = computed(() => {
-    if (!sortColumn.value) {
+// フィルター処理
+const filteredData = computed(() => {
+    if (!filterText.value) {
         return props.csvData;
     }
 
-    const sorted = [...props.csvData].sort((a, b) => {
+    const searchText = filterText.value.toLowerCase();
+    return props.csvData.filter(row => {
+        // 全てのカラムを検索対象とする
+        return columns.value.some(column => {
+            const value = String(row[column]).toLowerCase();
+            return value.includes(searchText);
+        });
+    });
+});
+
+// ソート処理（フィルター後のデータに対して実行）
+const sortedData = computed(() => {
+    const dataToSort = filteredData.value;
+
+    if (!sortColumn.value) {
+        return dataToSort;
+    }
+
+    const sorted = [...dataToSort].sort((a, b) => {
         const aValue = a[sortColumn.value];
         const bValue = b[sortColumn.value];
 
@@ -142,5 +191,9 @@ const handleSort = (column) => {
         sortColumn.value = column;
         sortDirection.value = 'asc';
     }
+};
+
+const clearFilter = () => {
+    filterText.value = '';
 };
 </script>
