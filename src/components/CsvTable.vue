@@ -148,6 +148,24 @@ const filteredData = computed(() => {
     });
 });
 
+// 日付かどうかを判定するヘルパー関数
+const isValidDate = (value) => {
+    if (!value || typeof value !== 'string') return false;
+
+    // 一般的な日付フォーマットパターン
+    const datePatterns = [
+        /^\d{4}[-/]\d{1,2}[-/]\d{1,2}/, // YYYY-MM-DD or YYYY/MM/DD
+        /^\d{1,2}[-/]\d{1,2}[-/]\d{4}/, // MM-DD-YYYY or DD-MM-YYYY
+        /^\d{4}年\d{1,2}月\d{1,2}日/,   // YYYY年MM月DD日
+    ];
+
+    const hasDatePattern = datePatterns.some(pattern => pattern.test(value));
+    if (!hasDatePattern) return false;
+
+    const date = new Date(value);
+    return !isNaN(date.getTime());
+};
+
 // ソート処理（フィルター後のデータに対して実行）
 const sortedData = computed(() => {
     const dataToSort = filteredData.value;
@@ -159,6 +177,13 @@ const sortedData = computed(() => {
     const sorted = [...dataToSort].sort((a, b) => {
         const aValue = a[sortColumn.value];
         const bValue = b[sortColumn.value];
+
+        // 日付として比較できる場合は日付として比較
+        if (isValidDate(aValue) && isValidDate(bValue)) {
+            const aDate = new Date(aValue);
+            const bDate = new Date(bValue);
+            return sortDirection.value === 'asc' ? aDate - bDate : bDate - aDate;
+        }
 
         // 数値として比較できる場合は数値として比較
         const aNum = parseFloat(aValue);
