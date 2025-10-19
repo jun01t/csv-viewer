@@ -23,14 +23,35 @@
                             <th
                                 class="bg-gray-800 px-4 py-4 text-center font-semibold border-b-2 border-gray-900 whitespace-nowrap sticky left-0 z-[15]">
                                 #</th>
-                            <th v-for="column in columns" :key="column"
-                                class="px-4 py-4 text-left font-semibold border-b-2 border-gray-900 whitespace-nowrap">
-                                {{ column }}
+                            <th v-for="column in columns" :key="column" @click="handleSort(column)"
+                                class="px-4 py-4 text-left font-semibold border-b-2 border-gray-900 whitespace-nowrap cursor-pointer hover:bg-gray-600 transition-colors duration-200">
+                                <div class="flex items-center gap-2">
+                                    <span>{{ column }}</span>
+                                    <span class="flex flex-col">
+                                        <svg v-if="sortColumn === column && sortDirection === 'asc'" class="w-4 h-4"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 15l7-7 7 7" />
+                                        </svg>
+                                        <svg v-else-if="sortColumn === column && sortDirection === 'desc'"
+                                            class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                        <svg v-else class="w-4 h-4 opacity-30" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(row, index) in csvData" :key="index" class="transition-colors duration-200"
+                        <tr v-for="(row, index) in sortedData" :key="index" class="transition-colors duration-200"
                             :class="index % 2 === 0 ? 'bg-gray-50 hover:bg-green-50' : 'bg-white hover:bg-green-50'">
                             <td
                                 class="px-4 py-3 text-center font-semibold text-gray-700 bg-gray-100 sticky left-0 z-[5]">
@@ -58,7 +79,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     csvData: {
@@ -71,10 +92,55 @@ const props = defineProps({
     }
 });
 
+const sortColumn = ref(null);
+const sortDirection = ref('asc'); // 'asc' or 'desc'
+
 const columns = computed(() => {
     if (props.csvData && props.csvData.length > 0) {
         return Object.keys(props.csvData[0]);
     }
     return [];
 });
+
+const sortedData = computed(() => {
+    if (!sortColumn.value) {
+        return props.csvData;
+    }
+
+    const sorted = [...props.csvData].sort((a, b) => {
+        const aValue = a[sortColumn.value];
+        const bValue = b[sortColumn.value];
+
+        // 数値として比較できる場合は数値として比較
+        const aNum = parseFloat(aValue);
+        const bNum = parseFloat(bValue);
+
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+            return sortDirection.value === 'asc' ? aNum - bNum : bNum - aNum;
+        }
+
+        // 文字列として比較
+        const aStr = String(aValue).toLowerCase();
+        const bStr = String(bValue).toLowerCase();
+
+        if (sortDirection.value === 'asc') {
+            return aStr.localeCompare(bStr);
+        } else {
+            return bStr.localeCompare(aStr);
+        }
+    });
+
+    return sorted;
+});
+
+const handleSort = (column) => {
+    if (sortColumn.value === column) {
+        // 同じカラムをクリックした場合は、ソート方向を切り替える
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        // 別のカラムをクリックした場合は、そのカラムで昇順ソート
+        sortColumn.value = column;
+        sortDirection.value = 'asc';
+    }
+};
 </script>
