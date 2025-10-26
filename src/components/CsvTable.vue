@@ -92,6 +92,21 @@
                             </td>
                         </tr>
                     </tbody>
+                    <!-- 合計行 -->
+                    <tfoot v-if="Object.keys(columnSums).length > 0" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky bottom-0">
+                        <tr>
+                            <td class="px-4 py-3 text-center font-bold border-t-2 border-blue-800 sticky left-0 z-[15] bg-blue-800">
+                                合計
+                            </td>
+                            <td v-for="column in columns" :key="column" 
+                                class="px-4 py-3 border-t-2 border-blue-800 font-semibold">
+                                <span v-if="columnSums[column] !== undefined" class="text-yellow-200">
+                                    {{ columnSums[column].toLocaleString() }}
+                                </span>
+                                <span v-else class="text-blue-300">-</span>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -205,6 +220,35 @@ const sortedData = computed(() => {
     });
 
     return sorted;
+});
+
+// 数値カラムかどうかを判定するヘルパー関数
+const isNumericColumn = (column) => {
+    if (!props.csvData || props.csvData.length === 0) return false;
+    
+    // カラムの値の80%以上が数値の場合、数値カラムとみなす
+    const values = props.csvData.map(row => row[column]).filter(val => val !== null && val !== undefined && val !== '');
+    if (values.length === 0) return false;
+    
+    const numericValues = values.filter(val => !isNaN(parseFloat(val)) && isFinite(val));
+    return numericValues.length / values.length >= 0.8;
+};
+
+// 数値カラムの合計を計算
+const columnSums = computed(() => {
+    const sums = {};
+    
+    columns.value.forEach(column => {
+        if (isNumericColumn(column)) {
+            const sum = filteredData.value.reduce((acc, row) => {
+                const value = parseFloat(row[column]);
+                return isNaN(value) ? acc : acc + value;
+            }, 0);
+            sums[column] = sum;
+        }
+    });
+    
+    return sums;
 });
 
 const handleSort = (column) => {
