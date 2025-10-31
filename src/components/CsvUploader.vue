@@ -40,56 +40,54 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import Papa from 'papaparse';
 import Encoding from 'encoding-japanese';
 
-const emit = defineEmits(['csv-parsed']);
+type CsvParsedPayload = { data: any[]; fileName: string } | null;
+const emit = defineEmits<{ 'csv-parsed': [payload: CsvParsedPayload] }>();
 
-const isDragging = ref(false);
-const fileName = ref('');
-const fileInput = ref(null);
+const isDragging = ref<boolean>(false);
+const fileName = ref<string>('');
+const fileInput = ref<HTMLInputElement | null>(null);
 
-const parseFile = (file) => {
+const parseFile = (file: File | null | undefined) => {
     if (file && file.type === 'text/csv') {
         fileName.value = file.name;
 
         // FileReaderを使用してファイルを読み込む
         const reader = new FileReader();
 
-        reader.onload = (e) => {
+        reader.onload = (e: ProgressEvent<FileReader>) => {
             try {
-                const codes = new Uint8Array(e.target.result);
+                const result = e.target?.result as ArrayBuffer;
+                const codes = new Uint8Array(result);
 
                 // エンコーディングを自動検出
-                const detectedEncoding = Encoding.detect(codes);
+                const detectedEncoding = (Encoding as any).detect(codes) as string | null;
                 console.log('検出されたエンコーディング:', detectedEncoding);
 
                 // UTF-8に変換
-                const unicodeArray = Encoding.convert(codes, {
+                const unicodeArray = (Encoding as any).convert(codes, {
                     to: 'UNICODE',
                     from: detectedEncoding || 'AUTO'
                 });
 
                 // UTF-8文字列に変換
-                const csvText = Encoding.codeToString(unicodeArray);
+                const csvText = (Encoding as any).codeToString(unicodeArray as any);
 
                 // PapaParseでCSVをパース
                 Papa.parse(csvText, {
-                    complete: (results) => {
+                    complete: (results: Papa.ParseResult<any>) => {
                         emit('csv-parsed', {
                             data: results.data,
                             fileName: file.name
                         });
                     },
                     header: true,
-                    skipEmptyLines: true,
-                    error: (error) => {
-                        console.error('CSVのパースエラー:', error);
-                        alert('CSVファイルの読み込みに失敗しました。');
-                    }
-                });
+                    skipEmptyLines: true
+                } as Papa.ParseConfig<any>);
             } catch (error) {
                 console.error('エンコーディング変換エラー:', error);
                 alert('CSVファイルの読み込みに失敗しました。');
@@ -107,16 +105,17 @@ const parseFile = (file) => {
     }
 };
 
-const handleDrop = (event) => {
+const handleDrop = (event: DragEvent) => {
     isDragging.value = false;
-    const files = event.dataTransfer.files;
+    const files = event.dataTransfer?.files as FileList;
     if (files.length > 0) {
         parseFile(files[0]);
     }
 };
 
-const handleFileSelect = (event) => {
-    const files = event.target.files;
+const handleFileSelect = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const files = input.files as FileList;
     if (files.length > 0) {
         parseFile(files[0]);
     }

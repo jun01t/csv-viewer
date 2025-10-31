@@ -93,12 +93,14 @@
                         </tr>
                     </tbody>
                     <!-- 合計行 -->
-                    <tfoot v-if="Object.keys(columnSums).length > 0" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky bottom-0">
+                    <tfoot v-if="Object.keys(columnSums).length > 0"
+                        class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky bottom-0">
                         <tr>
-                            <td class="px-4 py-3 text-center font-bold border-t-2 border-blue-800 sticky left-0 z-[15] bg-blue-800">
+                            <td
+                                class="px-4 py-3 text-center font-bold border-t-2 border-blue-800 sticky left-0 z-[15] bg-blue-800">
                                 合計
                             </td>
-                            <td v-for="column in columns" :key="column" 
+                            <td v-for="column in columns" :key="column"
                                 class="px-4 py-3 border-t-2 border-blue-800 font-semibold">
                                 <span v-if="columnSums[column] !== undefined" class="text-yellow-200">
                                     {{ columnSums[column].toLocaleString() }}
@@ -122,49 +124,48 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 
-const props = defineProps({
-    csvData: {
-        type: Array,
-        default: () => []
-    },
-    fileName: {
-        type: String,
-        default: ''
-    }
+type CsvRow = Record<string, string | number | null | undefined>;
+
+const props = withDefaults(defineProps < {
+    csvData: CsvRow[];
+    fileName: string;
+} > (), {
+    csvData: () => [],
+    fileName: ''
 });
 
-const sortColumn = ref(null);
-const sortDirection = ref('asc'); // 'asc' or 'desc'
-const filterText = ref(''); // フィルター用のテキスト
+const sortColumn = ref < string | null > (null);
+const sortDirection = ref < 'asc' | 'desc' > ('asc'); // 'asc' or 'desc'
+const filterText = ref < string > (''); // フィルター用のテキスト
 
-const columns = computed(() => {
+const columns = computed < string[] > (() => {
     if (props.csvData && props.csvData.length > 0) {
-        return Object.keys(props.csvData[0]);
+        return Object.keys(props.csvData[0] as Record<string, unknown>);
     }
-    return [];
+    return [] as string[];
 });
 
 // フィルター処理
-const filteredData = computed(() => {
+const filteredData = computed < CsvRow[] > (() => {
     if (!filterText.value) {
         return props.csvData;
     }
 
     const searchText = filterText.value.toLowerCase();
-    return props.csvData.filter(row => {
+    return props.csvData.filter((row: CsvRow) => {
         // 全てのカラムを検索対象とする
-        return columns.value.some(column => {
-            const value = String(row[column]).toLowerCase();
+        return columns.value.some((column: string) => {
+            const value = String(row[column] ?? '').toLowerCase();
             return value.includes(searchText);
         });
     });
 });
 
 // 日付かどうかを判定するヘルパー関数
-const isValidDate = (value) => {
+const isValidDate = (value: unknown): boolean => {
     if (!value || typeof value !== 'string') return false;
 
     // 一般的な日付フォーマットパターン
@@ -182,35 +183,35 @@ const isValidDate = (value) => {
 };
 
 // ソート処理（フィルター後のデータに対して実行）
-const sortedData = computed(() => {
+const sortedData = computed < CsvRow[] > (() => {
     const dataToSort = filteredData.value;
 
     if (!sortColumn.value) {
         return dataToSort;
     }
 
-    const sorted = [...dataToSort].sort((a, b) => {
-        const aValue = a[sortColumn.value];
-        const bValue = b[sortColumn.value];
+    const sorted = [...dataToSort].sort((a: CsvRow, b: CsvRow) => {
+        const aValue = a[sortColumn.value as string];
+        const bValue = b[sortColumn.value as string];
 
         // 日付として比較できる場合は日付として比較
         if (isValidDate(aValue) && isValidDate(bValue)) {
-            const aDate = new Date(aValue);
-            const bDate = new Date(bValue);
-            return sortDirection.value === 'asc' ? aDate - bDate : bDate - aDate;
+            const aDate = new Date(aValue as string);
+            const bDate = new Date(bValue as string);
+            return sortDirection.value === 'asc' ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
         }
 
         // 数値として比較できる場合は数値として比較
-        const aNum = parseFloat(aValue);
-        const bNum = parseFloat(bValue);
+        const aNum = typeof aValue === 'number' ? aValue : parseFloat(String(aValue));
+        const bNum = typeof bValue === 'number' ? bValue : parseFloat(String(bValue));
 
         if (!isNaN(aNum) && !isNaN(bNum)) {
             return sortDirection.value === 'asc' ? aNum - bNum : bNum - aNum;
         }
 
         // 文字列として比較
-        const aStr = String(aValue).toLowerCase();
-        const bStr = String(bValue).toLowerCase();
+        const aStr = String(aValue ?? '').toLowerCase();
+        const bStr = String(bValue ?? '').toLowerCase();
 
         if (sortDirection.value === 'asc') {
             return aStr.localeCompare(bStr);
@@ -223,35 +224,37 @@ const sortedData = computed(() => {
 });
 
 // 数値カラムかどうかを判定するヘルパー関数
-const isNumericColumn = (column) => {
+const isNumericColumn = (column: string): boolean => {
     if (!props.csvData || props.csvData.length === 0) return false;
-    
+
     // カラムの値の80%以上が数値の場合、数値カラムとみなす
-    const values = props.csvData.map(row => row[column]).filter(val => val !== null && val !== undefined && val !== '');
+    const values = props.csvData
+        .map(row => row[column])
+        .filter(val => val !== null && val !== undefined && val !== '');
     if (values.length === 0) return false;
-    
-    const numericValues = values.filter(val => !isNaN(parseFloat(val)) && isFinite(val));
+
+    const numericValues = values.filter(val => !isNaN(parseFloat(String(val))) && isFinite(Number(val)));
     return numericValues.length / values.length >= 0.8;
 };
 
 // 数値カラムの合計を計算
-const columnSums = computed(() => {
-    const sums = {};
-    
-    columns.value.forEach(column => {
+const columnSums = computed < Record < string, number>> (() => {
+    const sums: Record<string, number> = {};
+
+    columns.value.forEach((column: string) => {
         if (isNumericColumn(column)) {
-            const sum = filteredData.value.reduce((acc, row) => {
-                const value = parseFloat(row[column]);
+            const sum = filteredData.value.reduce((acc: number, row: CsvRow) => {
+                const value = typeof row[column] === 'number' ? (row[column] as number) : parseFloat(String(row[column]));
                 return isNaN(value) ? acc : acc + value;
             }, 0);
             sums[column] = sum;
         }
     });
-    
+
     return sums;
 });
 
-const handleSort = (column) => {
+const handleSort = (column: string) => {
     if (sortColumn.value === column) {
         // 同じカラムをクリックした場合は、ソート方向を切り替える
         sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
