@@ -13,7 +13,7 @@
     "allowJs": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["vite/client"]
+    "types": ["vite/client", "papaparse", "encoding-japanese"]
   },
   "include": [
     "src/**/*.ts",
